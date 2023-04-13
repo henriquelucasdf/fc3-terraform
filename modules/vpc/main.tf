@@ -6,8 +6,6 @@ resource "aws_vpc" "fc3-vpc" {
 
 }
 
-data "aws_availability_zones" "available" {}
-
 resource "aws_subnet" "subnets" {
   count                   = length(var.availability_zones)
   availability_zone       = var.availability_zones[count.index]
@@ -42,4 +40,19 @@ resource "aws_route_table_association" "fc3-rtb-association" {
   route_table_id = aws_route_table.fc3-rtb.id
   subnet_id      = aws_subnet.subnets.*.id[count.index]
 
+}
+
+resource "aws_security_group" "fc3-sg" {
+  vpc_id = aws_vpc.fc3-vpc.id
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+    prefix_list_ids = []
+  }
+
+  tags = {
+    Name = "${var.prefix}-sg"
+  }
 }
